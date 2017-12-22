@@ -1,0 +1,77 @@
+parameters:
+  index_prefix: testing_shoop_merchants
+  app_environment: servicetest
+  app_path: %paths.base%/bootstrap/app.php
+  always_refresh_index: false
+
+services:
+  service_argument_resolver:
+    class: MapleSyrupGroup\Search\Behat\Context\Argument\ServiceArgumentResolver
+    arguments:
+      - "@service_container"
+      -
+        MapleSyrupGroup\Search\Behat\Search\FixtureLoader: fixture_loader
+        MapleSyrupGroup\Search\Behat\Search\MerchantRepository: merchant_repository
+        MapleSyrupGroup\Search\Services\Merchants\Search: search
+        MapleSyrupGroup\Search\Services\Merchants\FindByUrl\Merchants: merchants
+    tags:
+      - { name: context.argument_resolver }
+
+  elastica:
+    class: Elastica\Client
+    public: false
+    arguments:
+      -
+        servers: [{host: localhost, port: 62000}]
+        bulk_max_size: 100
+        max_execution_time: 600
+
+  http_client:
+    class: GuzzleHttp\Client
+    public: false
+    arguments:
+      -
+        {base_uri: "http://search.app/api/v1/", timeout: 10}
+
+  test_import:
+    class: MapleSyrupGroup\Search\Behat\Search\TestImport
+    arguments: ["%app_path%", "%app_environment%", "%index_prefix%", "%always_refresh_index%", "@logger"]
+
+  import_listener:
+    class: MapleSyrupGroup\Search\Behat\Listener\ImportListener
+    arguments: ["@test_import"]
+    tags:
+      - {name: event_dispatcher.subscriber}
+
+  logger:
+    class: Symfony\Component\Console\Logger\ConsoleLogger
+    arguments: ["@cli.output"]
+
+  business_event_logger:
+    class: MapleSyrupGroup\Search\Services\BusinessEventLogger\BusinessEventLoggerImplementation
+    arguments:
+      - "@logger"
+
+  index_name_factory:
+    class: MapleSyrupGroup\Search\Services\Merchants\Elasticsearch\DomainIndexNameFactory
+    arguments:
+      - '%index_prefix%'
+
+  search_factory:
+    class: MapleSyrupGroup\Search\Services\Merchants\Factory\SearchFactory
+    arguments:
+      - "@business_event_logger"
+      - "@elastica"
+      - "@index_name_factory"
+
+  search:
+    class: MapleSyrupGroup\Search\Services\Merchants\Search
+    factory: ["@search_factory", createSearch]
+
+  merchants:
+    class: MapleSyrupGroup\Search\Services\Merchants\Elasticsearch\ElasticsearchMerchants
+    arguments: ['@elastica', '@index_name_factory']
+
+  merchant_repository:
+    class: MapleSyrupGroup\Search\Behat\Search\MerchantRepository
+    arguments: ["@http_client", "%index_prefix%"]

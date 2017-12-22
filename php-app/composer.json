@@ -1,0 +1,121 @@
+{
+  "name": "maple-syrup-group/search",
+  "description": "",
+  "authors": [
+    {
+      "name": "Andrew Jordan",
+      "email": "a.jordan@quidco.com"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "swagger-api/swagger-ui",
+        "version": "v2.0.24",
+        "source": {
+          "url": "https://github.com/swagger-api/swagger-ui.git",
+          "type": "git",
+          "reference": "v2.0.24"
+        }
+      }
+    },
+    {
+      "type": "vcs",
+      "url": "git@bitbucket.org:maplesyrupgroup/laravel-multi-tenant.git"
+    },
+    {
+      "type": "vcs",
+      "url": "git@bitbucket.org:maplesyrupgroup/laravel-annotations.git"
+    },
+    {
+      "type": "vcs",
+      "url": "git@bitbucket.org:maplesyrupgroup/q-common.git"
+    },
+    {
+      "type": "vcs",
+      "url": "git@bitbucket.org:maplesyrupgroup/quidco_api_client.git"
+    },
+    {
+      "type": "vcs",
+      "url": "git@bitbucket.org:maplesyrupgroup/q-platform-healthcheck.git"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9",
+    "laravel/framework": "5.1.*",
+    "league/fractal": "~0.11",
+    "guzzlehttp/guzzle": "~6.1",
+    "laracasts/generators": "1.1",
+    "maple-syrup-group/laravel-annotations": "dev-master",
+    "maple-syrup-group/q-common": "dev-master",
+    "maple-syrup-group/laravel-multi-tenant": "dev-master",
+    "ruflin/elastica": "dev-master",
+    "fintech-fab/laravel-queue-rabbitmq": "5.1",
+    "maple-syrup-group/quidco-api-client": "^3.0.0",
+    "monolog/monolog": "^1.18",
+    "maple-syrup-group/healthcheck": "^1.0",
+    "predis/predis": "^1.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.0",
+    "filp/whoops": "~1.0",
+    "flow/jsonpath": "dev-master",
+    "behat/behat": "^3.0",
+    "squizlabs/php_codesniffer": "*",
+    "phpmd/phpmd": "@stable",
+    "symfony/phpunit-bridge": "^3.0",
+    "zalas/behat-no-extension": "^1.0",
+    "kevinrob/guzzle-cache-middleware": "^1.4",
+    "symfony/cache": "^3.1",
+    "cache/integration-tests": "^0.10.0",
+    "barryvdh/laravel-debugbar": "~2.0",
+    "mikey179/vfsStream": "^1.6"
+  },
+  "replace": {
+    "illuminate/support": "5.0.*",
+    "illuminate/database": "5.0.*"
+  },
+  "autoload": {
+    "classmap": [
+      "database"
+    ],
+    "psr-4": {
+      "MapleSyrupGroup\\Search\\": [
+        "app/",
+        "src/"
+      ]
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MapleSyrupGroup\\Search\\Behat\\": "features/",
+      "MapleSyrupGroup\\Search\\": "tests/"
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "php artisan clear-compiled",
+      "php artisan optimize",
+      "php artisan swagger:flush",
+      "php artisan swagger:optimize"
+    ],
+    "post-update-cmd": [
+      "php artisan clear-compiled",
+      "php artisan optimize",
+      "php artisan swagger:flush",
+      "php artisan swagger:optimize"
+    ],
+    "post-root-package-install": [
+      "php -r \"copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
+      "php artisan key:generate"
+    ]
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
